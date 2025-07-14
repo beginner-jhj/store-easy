@@ -1,0 +1,30 @@
+{
+  "name": "store-easy",
+  "version": "1.0.0",
+  "description": "A lightweight, type-safe browser storage wrapper for localStorage and sessionStorage with namespace support, expiration, and type checking.",
+  "main": "store.js",
+  "exports": {
+    ".": {
+      "import": "./store.js",
+      "require": "./store.js"
+    }
+  },
+  "keywords": [
+    "storage",
+    "localStorage",
+    "sessionStorage",
+    "browser",
+    "type-safe",
+    "expiration",
+    "namespace",
+    "utility",
+    "wrapper"
+  ],
+  "author": "Hyunjin Jung <hj5014221@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/beginner-jhj/store-easy.git"
+  },
+  "sideEffects": false
+}
