@@ -1,7 +1,7 @@
 {
   "name": "store-easy",
-  "version": "1.0.0",
-  "description": "A lightweight, type-safe browser storage wrapper for localStorage and sessionStorage with namespace support, expiration, and type checking.",
+  "version": "1.1.0",
+  "description": "A lightweight, type-safe browser storage wrapper for localStorage and sessionStorage with namespace support and type checking.",
   "main": "store.js",
   "exports": {
     ".": {
@@ -15,7 +15,6 @@
     "sessionStorage",
     "browser",
     "type-safe",
-    "expiration",
     "namespace",
     "utility",
     "wrapper"

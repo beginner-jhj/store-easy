@@ -1,6 +1,7 @@
 class Store {
   #keys;
   #prefix;
+  #keyUpdateOff = false;
 
   /**
    * Create a new Store instance
@@ -53,7 +54,6 @@ class Store {
    * @param {any} value - The value to store
    * @param {{ 
    * type?: 'string' | 'number' | 'int' | 'object' | 'array' | 'boolean' | 'date', 
-   * expires?: number|string, 
    * strict?: boolean 
    * }} [options] - Optional options
    */
@@ -63,7 +63,6 @@ class Store {
 
     let {
       type = previous?.type,
-      expires,
       strict = previous?.strict ?? true,
     } = options;
 
@@ -79,11 +78,11 @@ class Store {
       this.#typeCheck(value, type);
     }
 
-    const expiresAt = expires ? Date.now() + this.#parseExpires(expires) : null;
-
-    const payload = { value, type, strict, expiresAt };
+    const payload = { value, type, strict };
     this.storage.setItem(fullKey, JSON.stringify(payload));
-    this.#updateKeys();
+    if(!this.#keyUpdateOff){
+      this.#updateKeys();
+    }
   }
 
   /**
@@ -92,33 +91,12 @@ class Store {
    */
   setMany(entries) {
     const iterable = entries instanceof Map ? entries.entries() : entries;
+    this.#keyUpdateOff = true;
     for (const item of iterable) {
       const [key, value, options = {}] = item;
-      const fullKey = this.#withPrefix(key);
-      const previous = this.#getMeta(fullKey);
-
-      let {
-        type = previous?.type,
-        expires,
-        strict = previous?.strict ?? true,
-      } = options;
-
-      if (strict && !type) {
-        throw new Error(`Type is required when strict is true (key: "${key}")`);
-      }
-
-      if (!type && !strict) {
-        type = "no-type";
-      }
-
-      if (strict) {
-        this.#typeCheck(value, type);
-      }
-
-      const expiresAt = expires ? Date.now() + this.#parseExpires(expires) : null;
-      const payload = { value, type, strict, expiresAt };
-      this.storage.setItem(fullKey, JSON.stringify(payload));
+      this.set(key, value, options);
     }
+    this.#keyUpdateOff = false;
     this.#updateKeys();
   }
 
@@ -133,12 +111,7 @@ class Store {
     if (!storedValue) return null;
 
     try {
-      const { value, type, strict, expiresAt } = JSON.parse(storedValue);
-
-      if (expiresAt && Date.now() > expiresAt) {
-        this.remove(key);
-        return null;
-      }
+      const { value, type, strict } = JSON.parse(storedValue);
 
       if (strict && type !== "no-type") {
         this.#typeCheck(value, type);
@@ -206,39 +179,6 @@ class Store {
     }
   }
 
-  /**
-   * Internal: Convert expires input to milliseconds
-   * @param {number|string} expires - The expires option
-   * @returns {number} Expiration duration in milliseconds
-   */
-  #parseExpires(expires) {
-    const unitToMs = {
-      s: 1000,
-      sec: 1000,
-      m: 60 * 1000,
-      min: 60 * 1000,
-      h: 60 * 60 * 1000,
-      d: 24 * 60 * 60 * 1000,
-    };
-    if (typeof expires === "number") return expires;
-
-    if (typeof expires === "string") {
-      const match = expires
-        .trim()
-        .toLowerCase()
-        .match(/^(\d+)\s*(s|sec|m|min|h|d)$/);
-      if (!match) {
-        throw new Error(`Invalid expires format: "${expires}"`);
-      }
-      const [, amount, unit] = match;
-      const ms = unitToMs[unit];
-      return parseInt(amount, 10) * ms;
-    }
-
-    throw new TypeError(
-      "expires must be a number or a string like '1d', '30min', etc."
-    );
-  }
 
   /**
    * Check if a key exists and is not expired
@@ -247,24 +187,6 @@ class Store {
    */
   has(key) {
     return this.get(key) !== null;
-  }
-
-  /**
-   * Check if a key is expired
-   * @param {string} key
-   * @returns {boolean}
-   */
-  isExpired(key) {
-    const fullKey = this.#withPrefix(key);
-    const raw = this.storage.getItem(fullKey);
-    if (!raw) return false;
-
-    try {
-      const { expiresAt } = JSON.parse(raw);
-      return expiresAt && Date.now() > expiresAt;
-    } catch {
-      return false;
-    }
   }
 
   /**
