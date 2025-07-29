@@ -52,19 +52,16 @@ class Store {
    * Set a value into storage
    * @param {string} key - The key
    * @param {any} value - The value to store
-   * @param {{ 
-   * type?: 'string' | 'number' | 'int' | 'object' | 'array' | 'boolean' | 'date', 
-   * strict?: boolean 
+   * @param {{
+   * type?: 'string' | 'number' | 'int' | 'object' | 'array' | 'boolean' | 'date',
+   * strict?: boolean
    * }} [options] - Optional options
    */
   set(key, value, options = {}) {
     const fullKey = this.#withPrefix(key);
     const previous = this.#getMeta(fullKey);
 
-    let {
-      type = previous?.type,
-      strict = previous?.strict ?? true,
-    } = options;
+    let { type = previous?.type, strict = previous?.strict ?? true } = options;
 
     if (strict && !type) {
       throw new Error("Type is required when strict is true");
@@ -80,7 +77,7 @@ class Store {
 
     const payload = { value, type, strict };
     this.storage.setItem(fullKey, JSON.stringify(payload));
-    if(!this.#keyUpdateOff){
+    if (!this.#keyUpdateOff) {
       this.#updateKeys();
     }
   }
@@ -179,9 +176,8 @@ class Store {
     }
   }
 
-
   /**
-   * Check if a key exists and is not expired
+   * Check if a key exists in storage
    * @param {string} key
    * @returns {boolean}
    */

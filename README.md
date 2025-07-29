@@ -87,3 +87,36 @@ The following types are supported under strict mode:
 - date
 
 If strict: false is passed, type checking is skipped and type defaults to "no-type".
+
+---
+
+## ❗ Error Handling & Type Failures
+
+`store-easy` includes built-in type validation. For example:
+
+```js
+store.set("age", "twenty", { type: "number" });
+// ❌ Throws: Type check failed. Expected number.
+```
+
+- If `strict: true` and the value does not match the type, a runtime error is thrown.
+- If no type is passed and `strict` is false, the value is saved without validation.
+- If the namespace is invalid (e.g., empty string), `.ns()` will throw an error.
+
+---
+
+## 🧪 Demo Page
+
+A live demo showcasing namespace separation, type safety, and multi-tab diary functionality:
+
+👉 [https://monologue-one.netlify.app](https://monologue-one.netlify.app)
+
+---
+
+## 🔧 What Problems Does This Library Solve?
+
+- LocalStorage/sessionStorage does not provide native type enforcement — this library ensures that values are stored/retrieved with the correct type.
+- Key collision is common in large apps — `store-easy` solves this via namespacing.
+- Manually parsing JSON, handling batch sets, or tracking keys can be tedious — `store-easy` simplifies these with a compact API.
+
+---
